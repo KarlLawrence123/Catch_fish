@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catfish Disease Detector - Aquatic Theme Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0277BD 0%, #00ACC1 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(2, 123, 189, 0.2);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .container {
+            flex: 1;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(2, 123, 189, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(2, 123, 189, 0.2);
+        }
+        
+        .status-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 28px;
+        }
+        
+        .status-healthy { background: linear-gradient(135deg, #4CAF50, #66BB6A); }
+        .status-suspicious { background: linear-gradient(135deg, #FF9800, #FFA726); }
+        .status-disease { background: linear-gradient(135deg, #E53935, #EF5350); }
+        
+        .status-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0D47A1;
+            margin-bottom: 8px;
+        }
+        
+        .status-description {
+            color: #616161;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: rgba(76, 175, 80, 0.15);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45A047);
+            border-radius: 6px;
+            transition: width 1.5s ease;
+        }
+        
+        .health-score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .score-label {
+            color: #616161;
+            font-size: 12px;
+        }
+        
+        .score-value {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .action-button {
+            background: linear-gradient(135deg, #0277BD, #00ACC1);
+            border: 2px solid rgba(2, 123, 189, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(2, 123, 189, 0.3);
+        }
+        
+        .action-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .detection-cards {
+            margin-top: 24px;
+        }
+        
+        .detection-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 8px rgba(2, 123, 189, 0.1);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .detection-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(2, 123, 189, 0.15);
+        }
+        
+        .detection-info {
+            flex: 1;
+        }
+        
+        .detection-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 24px;
+        }
+        
+        .detection-details {
+            flex: 1;
+        }
+        
+        .disease-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0D47A1;
+            margin-bottom: 4px;
+        }
+        
+        .confidence {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #0277BD;
+        }
+        
+        .timestamp {
+            color: #616161;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        .dark-mode {
+            background: linear-gradient(135deg, #0A1929 0%, #1A237E 100%);
+            color: white;
+        }
+        
+        .dark-mode .card {
+            background: #283593;
+            color: white;
+        }
+        
+        .dark-mode .status-title {
+            color: white;
+        }
+        
+        .dark-mode .status-description {
+            color: #B3E5FC;
+        }
+        
+        .dark-mode .action-button {
+            background: linear-gradient(135deg, #0D47A1, #01579B);
+        }
+        
+        .dark-mode .disease-name {
+            color: white;
+        }
+        
+        .dark-mode .confidence {
+            background: rgba(144, 202, 249, 0.2);
+            color: white;
+        }
+        
+        .dark-mode .timestamp {
+            color: #90CAF9;
+        }
+        
+        @media (max-width: 768px) {
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .theme-toggle {
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌊 Catfish Disease Detector</h1>
+        <p>AI-Based Image Detection with Real-Time Monitoring for Backyard Farmers</p>
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <span id="theme-icon">🌙</span>
+            <span id="theme-text">Light Mode</span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Health Status Card -->
+        <div class="card">
+            <div class="status-icon status-healthy">🟢</div>
+            <div class="detection-info">
+                <div>
+                    <div class="status-title">Pond Health Status</div>
+                    <div class="status-description">Your catfish pond is in excellent condition. Continue regular monitoring and maintain water quality.</div>
+                <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%;"></div>
+                    </div>
+                    <div class="health-score">
+                        <span class="score-label">Health Score</span>
+                        <span class="score-value">90%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-button">
+                <div class="action-icon">📊</div>
+                <div>Monitoring</div>
+            </div>
+            <div class="action-button">
+                <div class="action-icon">🔔</div>
+                <div>Alerts</div>
+            </div>
+            <div class="action-button">
+                <div class="action-icon">📋</div>
+                <div>History</div>
+            </div>
+            <div class="action-button">
+                <div class="action-icon">🐠</div>
+                <div>Scan Fish</div>
+            </div>
+        </div>
+        
+        <!-- Detection Cards -->
+        <div class="detection-cards">
+            <h2 style="color: #0D47A1; margin-bottom: 20px;">Recent Detections</h2>
+            
+            <div class="detection-card">
+                <div class="detection-icon status-disease">🔴</div>
+                <div class="detection-info">
+                    <div>
+                        <div class="disease-name">Columnaris</div>
+                        <div class="confidence">85%</div>
+                        <div class="timestamp">30 min ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detection-card">
+                <div class="detection-icon status-healthy">🟢</div>
+                <div class="detection-info">
+                    <div>
+                        <div class="disease-name">Healthy</div>
+                        <div class="confidence">95%</div>
+                        <div class="timestamp">2 hours ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detection-card">
+                <div class="detection-icon status-suspicious">🟡</div>
+                <div class="detection-info">
+                    <div>
+                        <div class="disease-name">Aeromonas</div>
+                        <div class="confidence">72%</div>
+                        <div class="timestamp">5 hours ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let isDarkMode = false;
+        
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            updateTheme();
+        }
+        
+        function updateTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark Mode';
+            } else {
+                body.classList.remove('dark-mode');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            }
+        }
+        
+        // Simulate real-time updates
+        function addNewDetection() {
+            const cardsContainer = document.querySelector('.detection-cards');
+            const detections = [
+                { emoji: '🟢', name: 'Healthy', confidence: 92, time: 'Just now' },
+                { emoji: '🟡', name: 'Suspicious', confidence: 68, time: '1 min ago' },
+                { emoji: '🔴', name: 'Columnaris', confidence: 78, time: '2 min ago' }
+            ];
+            
+            const newCard = detections[Math.floor(Math.random() * detections.length)];
+            const cardHTML = `
+                <div class="detection-card">
+                    <div class="detection-icon ${newCard.emoji === '🟢' ? 'status-healthy' : newCard.emoji === '🟡' ? 'status-suspicious' : 'status-disease'}">${newCard.emoji}</div>
+                    <div class="detection-info">
+                        <div>
+                            <div class="disease-name">${newCard.name}</div>
+                            <div class="confidence">${newCard.confidence}%</div>
+                            <div class="timestamp">${newCard.time}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = cardHTML;
+            cardsContainer.insertBefore(tempDiv, cardsContainer.firstChild);
+        }
+        
+        // Add new detection every 3 seconds
+        setInterval(addNewDetection, 3000);
+        
+        // Initialize theme
+        updateTheme();
+    </script>
+</body>
+</html>
