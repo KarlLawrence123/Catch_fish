@@ -125,11 +125,12 @@ class DiseaseInfoScreen extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -155,10 +156,10 @@ class DiseaseInfoScreen extends StatelessWidget {
                   child: Icon(
                     icon,
                     color: color,
-                    size: 36,
+                    size: 32,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -169,23 +170,23 @@ class DiseaseInfoScreen extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Expanded(
                   child: Text(
                     description,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.grey[600],
-                          height: 1.4,
+                          height: 1.3,
                         ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -207,12 +208,13 @@ class DiseaseInfoScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: color,
                               fontWeight: FontWeight.bold,
+                              fontSize: 11,
                             ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       Icon(
                         Icons.arrow_forward,
-                        size: 12,
+                        size: 11,
                         color: color,
                       ),
                     ],
