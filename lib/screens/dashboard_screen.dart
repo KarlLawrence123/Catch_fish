@@ -42,9 +42,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: Container(
-        decoration: AppTheme.aquaticBackground,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF001F3F), // Deep ocean
+                    const Color(0xFF003366),
+                    const Color(0xFF004080),
+                  ]
+                : [
+                    const Color(0xFFF0F9FF), // Shallow pond
+                    const Color(0xFFE1F5FE),
+                  ],
+          ),
+        ),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -58,12 +75,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.white
-                            : Colors.blueGrey[900])),
+                            : const Color(0xFF1A237E))), // Deep blue for better visibility
                 Text('Backyard Pond #1',
                     style: TextStyle(
+                        fontSize: 14,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.grey[400]
-                            : Colors.blueGrey[400])),
+                            : const Color(0xFF37474F))), // Dark grey for better visibility
                 const SizedBox(height: 25),
 
                 // Main Status
@@ -119,7 +137,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.white
-                            : Colors.black)),
+                            : const Color(0xFF1A237E))), // Deep blue for better visibility
                 const SizedBox(height: 15),
                 GridView.count(
                   shrinkWrap: true,
