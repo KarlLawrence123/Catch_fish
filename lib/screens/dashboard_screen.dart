@@ -47,7 +47,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        backgroundColor: const Color(0xFF0277BD),
+        backgroundColor: isDarkMode 
+            ? const Color(0xFF1A237E)  // Dark mode: deep blue
+            : const Color(0xFF0277BD), // Light mode: ocean blue
         foregroundColor: Colors.white,
         elevation: 0,
       ),
