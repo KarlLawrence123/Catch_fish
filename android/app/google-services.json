@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "862008359248",
+    "project_id": "catfish-disease-detector",
+    "storage_bucket": "catfish-disease-detector.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:862008359248:android:5dc4d5e10aab2d84bb1455",
+        "android_client_info": {
+          "package_name": "com.example.catfish_disease_detector"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1Ca-fsr5vigoQzXw-JlglyX2KL00x2s8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
