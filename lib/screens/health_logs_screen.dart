@@ -72,6 +72,7 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
   }
 
   Widget _buildCalendarView(DetectionProvider provider) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final detectionsByDate = <DateTime, List<DetectionData>>{};
     for (var detection in provider.detections) {
       final date = DateTime(
@@ -87,8 +88,10 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[300]!),
-          color: Colors.white,
+          border: Border.all(
+            color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+          ),
+          color: isDarkMode ? const Color(0xFF2D3748) : Colors.white,
         ),
         child: Column(
           children: [
@@ -113,6 +116,7 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
                     '${_getMonthName(_focusedDate.month)} ${_focusedDate.year}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
                         ),
                   ),
                   IconButton(
@@ -146,7 +150,7 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
                                   .bodySmall
                                   ?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.grey[600],
+                                    color: isDarkMode ? Colors.grey[300] : Colors.grey[600],
                                   ),
                             ),
                           ),
@@ -167,6 +171,7 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
   }
 
   Widget _buildCalendarGrid(Map<DateTime, List<DetectionData>> detectionsByDate) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final firstDay = DateTime(_focusedDate.year, _focusedDate.month, 1);
     final lastDay = DateTime(_focusedDate.year, _focusedDate.month + 1, 0);
     final daysInMonth = lastDay.day;
@@ -215,7 +220,9 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
                 Text(
                   '$day',
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
+                    color: isSelected 
+                        ? Colors.white 
+                        : (isDarkMode ? Colors.white : Colors.black),
                     fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -248,6 +255,7 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
   }
 
   Widget _buildDetectionsForDate(DetectionProvider provider) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final detectionsForDate = provider.detections.where((detection) {
       final detectionDate = DateTime(
         detection.timestamp.year,
@@ -271,6 +279,7 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
             'Detections for ${_formatDate(_selectedDate)}',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
           ),
           const SizedBox(height: 12),
@@ -278,13 +287,15 @@ class _HealthLogsScreenState extends State<HealthLogsScreen> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: Colors.grey[100],
+                color: isDarkMode ? const Color(0xFF2D3748) : Colors.grey[100],
               ),
               padding: const EdgeInsets.all(24),
               child: Center(
                 child: Text(
                   'No detections on this date',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: isDarkMode ? Colors.grey[300] : Colors.grey[600],
+                  ),
                 ),
               ),
             )
