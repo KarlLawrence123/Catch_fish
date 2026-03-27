@@ -6,12 +6,35 @@ class DiseaseInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: const Text('Disease Information'),
+        backgroundColor: isDarkMode 
+            ? const Color(0xFF1A237E)
+            : const Color(0xFF0277BD),
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF001F3F),
+                    const Color(0xFF003366),
+                    const Color(0xFF004080),
+                  ]
+                : [
+                    const Color(0xFFF0F9FF),
+                    const Color(0xFFE1F5FE),
+                  ],
+          ),
+        ),
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -20,14 +43,14 @@ class DiseaseInfoScreen extends StatelessWidget {
               'Catfish Diseases',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryColor,
+                    color: isDarkMode ? Colors.white : const Color(0xFF0277BD),
                   ),
             ),
             const SizedBox(height: 8),
             Text(
               'Learn about common catfish diseases and how to prevent them',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
+                    color: isDarkMode ? Colors.grey[300] : Colors.grey[600],
                   ),
             ),
             const SizedBox(height: 24),
@@ -82,6 +105,7 @@ class DiseaseInfoScreen extends StatelessWidget {
               ],
             ),
           ],
+        ),
         ),
       ),
     );

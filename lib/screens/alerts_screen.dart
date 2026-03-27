@@ -8,10 +8,16 @@ class AlertsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: const Text('Alerts'),
+        backgroundColor: isDarkMode 
+            ? const Color(0xFF1A237E)
+            : const Color(0xFF0277BD),
+        foregroundColor: Colors.white,
+        elevation: 0,
         actions: [
           Consumer<DetectionProvider>(
             builder: (context, provider, child) {
@@ -25,7 +31,24 @@ class AlertsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer<DetectionProvider>(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF001F3F),
+                    const Color(0xFF003366),
+                    const Color(0xFF004080),
+                  ]
+                : [
+                    const Color(0xFFF0F9FF),
+                    const Color(0xFFE1F5FE),
+                  ],
+          ),
+        ),
+        child: Consumer<DetectionProvider>(
         builder: (context, provider, child) {
           final unreadAlerts =
               provider.alerts.where((alert) => !alert.isRead).toList();
@@ -164,6 +187,7 @@ class AlertsScreen extends StatelessWidget {
             ],
           );
         },
+        ),
       ),
     );
   }
