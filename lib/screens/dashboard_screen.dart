@@ -75,13 +75,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.white
-                            : const Color(0xFF1A237E))), // Deep blue for better visibility
+                            : const Color(0xFF0277BD))), // Ocean blue to match theme
                 Text('Backyard Pond #1',
                     style: TextStyle(
                         fontSize: 14,
+                        fontWeight: FontWeight.w500,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.grey[400]
-                            : const Color(0xFF37474F))), // Dark grey for better visibility
+                            : const Color(0xFF0288D1))), // Lighter ocean blue
                 const SizedBox(height: 25),
 
                 // Main Status
@@ -137,7 +138,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.white
-                            : const Color(0xFF1A237E))), // Deep blue for better visibility
+                            : const Color(0xFF0277BD))), // Ocean blue to match theme
                 const SizedBox(height: 15),
                 GridView.count(
                   shrinkWrap: true,
