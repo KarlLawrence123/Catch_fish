@@ -120,8 +120,8 @@ class DiseaseInfoScreen extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: Theme.of(context).brightness == Brightness.dark
                   ? [
-                      const Color(0xFF1E1E1E),
-                      color.withOpacity(0.1),
+                      const Color(0xFF2D3748), // Lighter dark grey
+                      const Color(0xFF1A202C), // Dark blue-grey
                     ]
                   : [
                       Colors.white,
@@ -130,12 +130,12 @@ class DiseaseInfoScreen extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -161,10 +161,10 @@ class DiseaseInfoScreen extends StatelessWidget {
                   child: Icon(
                     icon,
                     color: color,
-                    size: 32,
+                    size: 28,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -177,7 +177,7 @@ class DiseaseInfoScreen extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Expanded(
                   child: Text(
                     description,
@@ -193,7 +193,7 @@ class DiseaseInfoScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
