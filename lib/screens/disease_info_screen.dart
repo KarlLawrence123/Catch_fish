@@ -118,10 +118,15 @@ class DiseaseInfoScreen extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                color.withOpacity(0.02),
-              ],
+              colors: Theme.of(context).brightness == Brightness.dark
+                  ? [
+                      const Color(0xFF1E1E1E),
+                      color.withOpacity(0.1),
+                    ]
+                  : [
+                      Colors.white,
+                      color.withOpacity(0.02),
+                    ],
             ),
           ),
           child: Padding(
@@ -164,9 +169,11 @@ class DiseaseInfoScreen extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.grey[800],
                       ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                 ),
@@ -175,10 +182,13 @@ class DiseaseInfoScreen extends StatelessWidget {
                   child: Text(
                     description,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey[300]
+                              : Colors.grey[600],
                           height: 1.3,
+                          fontSize: 12,
                         ),
-                    maxLines: 3,
+                    maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                   ),
