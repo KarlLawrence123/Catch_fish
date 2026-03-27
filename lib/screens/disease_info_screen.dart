@@ -279,14 +279,33 @@ class DiseaseDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: Text(title),
         backgroundColor: color,
         foregroundColor: Colors.white,
       ),
-      body: detailScreen,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDarkMode
+                ? [
+                    const Color(0xFF001F3F),
+                    const Color(0xFF003366),
+                    const Color(0xFF004080),
+                  ]
+                : [
+                    const Color(0xFFF0F9FF),
+                    const Color(0xFFE1F5FE),
+                  ],
+          ),
+        ),
+        child: detailScreen,
+      ),
     );
   }
 }
@@ -573,34 +592,44 @@ class FinRotInfo extends StatelessWidget {
 
 // Updated _buildSection to accept color as a parameter and remove const
 Widget _buildSection(String title, List<String> items, Color themeColor) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        title,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: themeColor,
-        ),
-      ),
-      const SizedBox(height: 8),
-      ...items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 4, left: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('• ', style: TextStyle(color: themeColor)),
-                Expanded(
-                  child: Text(
-                    item,
-                    style: const TextStyle(fontSize: 14, height: 1.4),
-                  ),
-                ),
-              ],
+  return Builder(
+    builder: (context) {
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+      
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: themeColor,
             ),
-          )),
-      const SizedBox(height: 16),
-    ],
+          ),
+          const SizedBox(height: 8),
+          ...items.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 4, left: 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('• ', style: TextStyle(color: themeColor)),
+                    Expanded(
+                      child: Text(
+                        item,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.4,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+          const SizedBox(height: 16),
+        ],
+      );
+    },
   );
 }
