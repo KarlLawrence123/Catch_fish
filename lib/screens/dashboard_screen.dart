@@ -56,9 +56,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey[900])),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.blueGrey[900])),
                 Text('Backyard Pond #1',
-                    style: TextStyle(color: Colors.blueGrey[400])),
+                    style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey[400]
+                            : Colors.blueGrey[400])),
                 const SizedBox(height: 25),
 
                 // Main Status
@@ -108,9 +113,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
 
                 // Quick Actions
-                const Text('Quick Actions',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('Quick Actions',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black)),
                 const SizedBox(height: 15),
                 GridView.count(
                   shrinkWrap: true,
