@@ -64,43 +64,43 @@ class DiseaseInfoScreen extends StatelessWidget {
               children: [
                 _buildDiseaseCard(
                   context,
-                  'Columnaris',
-                  'Bacterial infection causing cotton-like growth',
-                  Icons.coronavirus,
-                  AppTheme.dangerColor,
-                  const ColumnarisInfo(),
-                ),
-                _buildDiseaseCard(
-                  context,
-                  'Aeromonas',
-                  'Hemorrhagic septicemia and ulcers',
-                  Icons.water_drop,
-                  AppTheme.warningColor,
-                  const AeromonasInfo(),
-                ),
-                _buildDiseaseCard(
-                  context,
-                  'White Spot',
-                  'Protozoan parasite with white spots',
+                  'White Spot Disease',
+                  'Ichthyophthiriasis - Protozoan parasite',
                   Icons.grain,
                   AppTheme.secondaryColor,
                   const WhiteSpotInfo(),
                 ),
                 _buildDiseaseCard(
                   context,
-                  'Fungal Infection',
-                  'Cotton wool-like fungal growth',
-                  Icons.cloud,
-                  AppTheme.primaryColor,
-                  const FungalInfectionInfo(),
+                  'Motile Aeromonas Septicemia',
+                  'MAS - Hemorrhagic bacterial infection',
+                  Icons.water_drop,
+                  AppTheme.dangerColor,
+                  const AeromonasInfo(),
                 ),
                 _buildDiseaseCard(
                   context,
-                  'Fin Rot',
-                  'Progressive deterioration of fins',
-                  Icons.waves,
+                  'Columnaris Disease',
+                  'Bacterial infection with cotton-like lesions',
+                  Icons.coronavirus,
+                  AppTheme.warningColor,
+                  const ColumnarisInfo(),
+                ),
+                _buildDiseaseCard(
+                  context,
+                  'Saprolegniasis',
+                  'Fungal infection with cotton wool growth',
+                  Icons.cloud,
+                  AppTheme.primaryColor,
+                  const SaprolegniasisInfo(),
+                ),
+                _buildDiseaseCard(
+                  context,
+                  'Bacterial Gill Disease',
+                  'Gill infection causing respiratory distress',
+                  Icons.air,
                   AppTheme.suspiciousColor,
-                  const FinRotInfo(),
+                  const BacterialGillDiseaseInfo(),
                 ),
               ],
             ),
@@ -478,8 +478,8 @@ class WhiteSpotInfo extends StatelessWidget {
   }
 }
 
-class FungalInfectionInfo extends StatelessWidget {
-  const FungalInfectionInfo({super.key});
+class SaprolegniasisInfo extends StatelessWidget {
+  const SaprolegniasisInfo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -534,8 +534,8 @@ class FungalInfectionInfo extends StatelessWidget {
   }
 }
 
-class FinRotInfo extends StatelessWidget {
-  const FinRotInfo({super.key});
+class BacterialGillDiseaseInfo extends StatelessWidget {
+  const BacterialGillDiseaseInfo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -547,41 +547,41 @@ class FinRotInfo extends StatelessWidget {
           _buildSection(
               'Symptoms',
               [
-                'Progressive deterioration of fins',
-                'Fins appear ragged and frayed',
-                'White edges on affected fins',
-                'Inflammation at fin base',
-                'Secondary bacterial infections',
+                'Rapid gill movement and gasping',
+                'Swollen and discolored gills',
+                'Mucus accumulation on gills',
+                'Lethargy and loss of appetite',
+                'Fish gathering at water surface',
               ],
               AppTheme.suspiciousColor),
           _buildSection(
               'Causes',
               [
-                'Bacterial infection (Pseudomonas, Aeromonas)',
-                'Poor water quality',
-                'Stress and overcrowding',
-                'Injuries from aggressive fish',
-                'Nutritional deficiencies',
+                'Bacterial infection (Flavobacterium)',
+                'Poor water quality and low oxygen',
+                'High ammonia or nitrite levels',
+                'Overcrowding and stress',
+                'Organic debris in water',
               ],
               AppTheme.suspiciousColor),
           _buildSection(
               'Treatment',
               [
-                'Antibiotics: Tetracycline or Kanamycin',
-                'Salt treatment (0.5-1% NaCl)',
                 'Improve water quality immediately',
-                'Remove aggressive tank mates',
-                'Vitamin supplements in feed',
+                'Increase aeration and oxygen levels',
+                'Antibacterial medications',
+                'Salt baths (1-3 ppt)',
+                'Reduce feeding temporarily',
               ],
               AppTheme.suspiciousColor),
           _buildSection(
               'Prevention',
               [
-                'Maintain optimal water parameters',
-                'Provide adequate space for fish',
-                'Balanced and nutritious diet',
-                'Regular water changes',
-                'Monitor fish behavior closely',
+                'Maintain excellent water quality',
+                'Ensure adequate aeration',
+                'Regular water testing',
+                'Avoid overcrowding',
+                'Proper filtration system',
               ],
               AppTheme.suspiciousColor),
         ],
