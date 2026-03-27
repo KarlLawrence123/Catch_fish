@@ -93,8 +93,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             : const Color(0xFF0288D1))), // Lighter ocean blue
                 const SizedBox(height: 25),
 
-                // Main Status
-                const HealthStatusCard(status: 'disease'),
+                // Main Status - Real data from detections
+                Consumer<DetectionProvider>(
+                  builder: (context, provider, _) {
+                    // Determine status based on actual detections
+                    String status = 'healthy';
+                    if (provider.detections.isNotEmpty) {
+                      final recentDetections = provider.detections.take(5).toList();
+                      final hasCritical = recentDetections.any((d) => d.severity == 'critical');
+                      final hasModerate = recentDetections.any((d) => d.severity == 'moderate');
+                      
+                      if (hasCritical) {
+                        status = 'disease';
+                      } else if (hasModerate) {
+                        status = 'suspicious';
+                      }
+                    }
+                    return HealthStatusCard(status: status);
+                  },
+                ),
                 const SizedBox(height: 20),
 
                 // Critical Alert Banner
@@ -113,7 +130,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Consumer<DetectionProvider>(
                   builder: (context, provider, _) {
                     if (provider.detections.isEmpty) {
-                      return const SizedBox.shrink();
+                      // Show helpful message when no detections yet
+                      return Container(
+                        padding: const EdgeInsets.all(20),
+                        margin: const EdgeInsets.only(bottom: 20),
+                        decoration: BoxDecoration(
+                          color: isDarkMode 
+                              ? const Color(0xFF2D3748)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppTheme.primaryColor.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 48,
+                              color: AppTheme.primaryColor,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No Detections Yet',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Start monitoring to detect diseases',
+                              style: TextStyle(
+                                color: isDarkMode ? Colors.grey[300] : Colors.grey[600],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
                     }
                     final latest = provider.detections.first;
                     return Column(

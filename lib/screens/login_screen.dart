@@ -78,8 +78,7 @@ class _LoginScreenState extends State<LoginScreen>
         print('Login successful: ${user.email}');
 
         if (mounted) {
-          Provider.of<DetectionProvider>(context, listen: false)
-              .initializeSampleData();
+          // No sample data - app will show real detections only
           Navigator.of(context).pushReplacementNamed('/home');
         }
       } else {
