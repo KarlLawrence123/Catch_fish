@@ -81,10 +81,7 @@ class _MainScreenState extends State<MainScreen> {
       const AlertsScreen(),
       const DiseaseInfoScreen(),
     ];
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<DetectionProvider>(context, listen: false)
-          .initializeSampleData();
-    });
+    // No sample data initialization - app will show real detections only
   }
 
   void _onNavigate(int index) {
