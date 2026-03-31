@@ -1,4 +1,4 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/quick_action_button.dart';
@@ -236,11 +236,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       },
                     ),
                     QuickActionButton(
-                      icon: Icons.camera_alt,
-                      label: 'Scan Fish',
-                      color: Colors.cyan,
+                      icon: Icons.photo_library,
+                      label: 'Gallery',
+                      color: Colors.purple,
                       onTap: () {
-                        widget.onNavigate?.call(1);
+                        Navigator.pushNamed(context, '/gallery');
                       },
                     ),
                   ],

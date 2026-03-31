@@ -155,7 +155,7 @@ class CameraService {
       final response = await request.close();
       
       if (response.statusCode == 200) {
-        final bytes = await consolidateHttpClientResponseBytes(response);
+        final bytes = await _consolidateBytes(response);
         return bytes;
       } else {
         throw Exception('Failed to capture from network camera: ${response.statusCode}');
@@ -164,6 +164,15 @@ class CameraService {
       print('Error capturing from network camera: $e');
       return null;
     }
+  }
+
+  // Helper method to consolidate HTTP response bytes
+  Future<Uint8List> _consolidateBytes(HttpClientResponse response) async {
+    final List<int> bytes = [];
+    await for (var chunk in response) {
+      bytes.addAll(chunk);
+    }
+    return Uint8List.fromList(bytes);
   }
 
   // Save network camera image

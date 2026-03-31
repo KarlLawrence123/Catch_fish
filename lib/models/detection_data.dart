@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../services/database_service.dart';
 
 class DetectionData {
   final String id;
@@ -137,6 +138,7 @@ class DetectionProvider extends ChangeNotifier {
   int _totalAlerts = 0;
   EnvironmentalStats? _currentEnvironmentalStats;
   bool _nightModeEnabled = false;
+  final DatabaseService _databaseService = DatabaseService();
 
   List<DetectionData> get detections => _detections;
   List<AlertData> get alerts => _alerts;
@@ -145,6 +147,17 @@ class DetectionProvider extends ChangeNotifier {
   EnvironmentalStats? get currentEnvironmentalStats =>
       _currentEnvironmentalStats;
   bool get nightModeEnabled => _nightModeEnabled;
+
+  // Load detections from database on initialization
+  Future<void> loadDetections() async {
+    try {
+      _detections = await _databaseService.getAllDetections();
+      _updatePondStatus();
+      notifyListeners();
+    } catch (e) {
+      print('Error loading detections: $e');
+    }
+  }
 
   void _updatePondStatus() {
     if (_detections.any((d) => d.status == 'disease')) {
@@ -156,8 +169,15 @@ class DetectionProvider extends ChangeNotifier {
     }
   }
 
-  void addDetection(DetectionData detection) {
+  Future<void> addDetection(DetectionData detection) async {
     _detections.insert(0, detection);
+
+    // Save to database
+    try {
+      await _databaseService.insertDetection(detection);
+    } catch (e) {
+      print('Error saving detection to database: $e');
+    }
 
     // Create alert if disease or suspicious
     if (detection.status != 'healthy') {
@@ -173,6 +193,9 @@ class DetectionProvider extends ChangeNotifier {
         detectionId: detection.id,
       );
       _alerts.insert(0, alert);
+      
+      // Note: Alert saving to database would require adding insertAlert method to DatabaseService
+      // For now, alerts are kept in memory only
     }
 
     _updatePondStatus();

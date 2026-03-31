@@ -79,13 +79,14 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: Colors.white,
-        elevation: 0,
+        elevation: 8,
+        shadowColor: lightWaterShadow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Colors.white, width: 0.5),
         ),
+        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
@@ -126,7 +127,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: darkCardColor,
         elevation: 0,
         shape: RoundedRectangleBorder(

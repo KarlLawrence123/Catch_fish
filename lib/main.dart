@@ -8,6 +8,7 @@ import 'screens/disease_info_screen.dart';
 import 'screens/dual_stream_monitoring_screen.dart';
 import 'screens/health_logs_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/gallery_screen.dart';
 import 'models/detection_data.dart';
 import 'services/database_service.dart';
 import 'services/auth_service.dart';
@@ -35,7 +36,11 @@ class CatfishDetectorApp extends StatelessWidget {
     // 1. We use MultiProvider to inject BOTH your data and your theme logic
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => DetectionProvider()),
+        ChangeNotifierProvider(create: (_) {
+          final provider = DetectionProvider();
+          provider.loadDetections(); // Load saved detections from database
+          return provider;
+        }),
         ChangeNotifierProvider(create: (_) => ThemeNotifier()),
       ],
       // 2. We use a Consumer here so the MaterialApp REBUILDS when the theme changes
@@ -51,6 +56,7 @@ class CatfishDetectorApp extends StatelessWidget {
             home: const LoginScreen(),
             routes: {
               '/home': (context) => const MainScreen(),
+              '/gallery': (context) => const GalleryScreen(),
             },
           );
         },
@@ -79,6 +85,7 @@ class _MainScreenState extends State<MainScreen> {
       const DualStreamMonitoringScreen(),
       const HealthLogsScreen(),
       const AlertsScreen(),
+      const GalleryScreen(),
       const DiseaseInfoScreen(),
     ];
     // No sample data initialization - app will show real detections only
@@ -174,6 +181,8 @@ class _MainScreenState extends State<MainScreen> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.notifications), label: 'Alerts'),
             BottomNavigationBarItem(
+                icon: Icon(Icons.photo_library), label: 'Gallery'),
+            BottomNavigationBarItem(
                 icon: Icon(Icons.healing), label: 'Diseases'),
           ],
         ),
@@ -192,6 +201,8 @@ class _MainScreenState extends State<MainScreen> {
       case 3:
         return 'Alerts';
       case 4:
+        return 'Gallery';
+      case 5:
         return 'Diseases';
       default:
         return 'Catfish Detector';
