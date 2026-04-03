@@ -131,29 +131,30 @@ class _FullscreenCameraViewState extends State<FullscreenCameraView> {
                               // Live Indicator
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
+                                  horizontal: 8,
+                                  vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.red,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
-                                      width: 8,
-                                      height: 8,
+                                      width: 6,
+                                      height: 6,
                                       decoration: const BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
-                                    const SizedBox(width: 6),
+                                    const SizedBox(width: 4),
                                     const Text(
                                       'LIVE',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 12,
+                                        fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
