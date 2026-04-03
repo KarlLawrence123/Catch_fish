@@ -193,7 +193,7 @@ class DetectionProvider extends ChangeNotifier {
         detectionId: detection.id,
       );
       _alerts.insert(0, alert);
-      
+
       // Note: Alert saving to database would require adding insertAlert method to DatabaseService
       // For now, alerts are kept in memory only
     }
@@ -208,6 +208,25 @@ class DetectionProvider extends ChangeNotifier {
     alert.isRead = true;
     _totalAlerts = _alerts.where((alert) => !alert.isRead).length;
     notifyListeners();
+  }
+
+  // Delete detection from database and list
+  Future<void> deleteDetection(String detectionId) async {
+    try {
+      // Remove from database
+      await _databaseService.deleteDetection(detectionId);
+
+      // Remove from list
+      _detections.removeWhere((d) => d.id == detectionId);
+
+      // Update pond status after deletion
+      _updatePondStatus();
+
+      notifyListeners();
+    } catch (e) {
+      print('Error deleting detection: $e');
+      rethrow;
+    }
   }
 
   void toggleNightMode() {

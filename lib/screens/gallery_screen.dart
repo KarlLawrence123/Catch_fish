@@ -17,13 +17,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Image Gallery'),
-        backgroundColor: isDark 
-            ? const Color(0xFF1A237E)
-            : const Color(0xFF0277BD),
+        backgroundColor:
+            isDark ? const Color(0xFF1A237E) : const Color(0xFF0277BD),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -37,8 +36,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'all', child: Text('All Images')),
               const PopupMenuItem(value: 'healthy', child: Text('Healthy')),
-              const PopupMenuItem(value: 'suspicious', child: Text('Suspicious')),
-              const PopupMenuItem(value: 'disease', child: Text('Disease Detected')),
+              const PopupMenuItem(
+                  value: 'suspicious', child: Text('Suspicious')),
+              const PopupMenuItem(
+                  value: 'disease', child: Text('Disease Detected')),
             ],
           ),
         ],
@@ -64,7 +65,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
           builder: (context, provider, _) {
             // Filter detections based on selected filter
             List<DetectionData> filteredDetections = provider.detections;
-            
+
             if (_filterStatus != 'all') {
               filteredDetections = provider.detections
                   .where((d) => d.status.toLowerCase() == _filterStatus)
@@ -115,7 +116,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 Expanded(
                   child: GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
@@ -175,7 +177,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   Widget _buildImageCard(DetectionData detection, bool isDark) {
     final statusColor = AppTheme.getHealthStatusColor(detection.status);
-    
+
     return GestureDetector(
       onTap: () => _showImageDetail(detection),
       child: Container(
@@ -196,15 +198,18 @@ class _GalleryScreenState extends State<GalleryScreen> {
             // Image
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: detection.imagePath != null && File(detection.imagePath!).existsSync()
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+                child: detection.imagePath != null &&
+                        File(detection.imagePath!).existsSync()
                     ? Image.file(
                         File(detection.imagePath!),
                         fit: BoxFit.cover,
                         width: double.infinity,
                       )
                     : Container(
-                        color: isDark ? const Color(0xFF1A237E) : Colors.grey[200],
+                        color:
+                            isDark ? const Color(0xFF1A237E) : Colors.grey[200],
                         child: Icon(
                           Icons.image_not_supported,
                           size: 48,
@@ -237,7 +242,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : const Color(0xFF0D47A1),
+                            color:
+                                isDark ? Colors.white : const Color(0xFF0D47A1),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -305,7 +311,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   void _showImageDetail(DetectionData detection) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -320,8 +326,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
             children: [
               // Image
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                child: detection.imagePath != null && File(detection.imagePath!).existsSync()
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+                child: detection.imagePath != null &&
+                        File(detection.imagePath!).existsSync()
                     ? Image.file(
                         File(detection.imagePath!),
                         fit: BoxFit.contain,
@@ -329,7 +337,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                       )
                     : Container(
                         height: 300,
-                        color: isDark ? const Color(0xFF1A237E) : Colors.grey[200],
+                        color:
+                            isDark ? const Color(0xFF1A237E) : Colors.grey[200],
                         child: const Icon(Icons.image_not_supported, size: 64),
                       ),
               ),
@@ -349,15 +358,26 @@ class _GalleryScreenState extends State<GalleryScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    _buildDetailRow('Confidence', '${(detection.confidence * 100).toStringAsFixed(1)}%', isDark),
-                    _buildDetailRow('Status', detection.status.toUpperCase(), isDark),
-                    _buildDetailRow('Date', _formatDate(detection.timestamp), isDark),
+                    _buildDetailRow(
+                        'Confidence',
+                        '${(detection.confidence * 100).toStringAsFixed(1)}%',
+                        isDark),
+                    _buildDetailRow(
+                        'Status', detection.status.toUpperCase(), isDark),
+                    _buildDetailRow(
+                        'Date', _formatDate(detection.timestamp), isDark),
                     if (detection.cameraView != null)
                       _buildDetailRow('Camera', detection.cameraView!, isDark),
                     const SizedBox(height: 16),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        TextButton.icon(
+                          onPressed: () => _deleteDetection(detection),
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          label: const Text('Delete',
+                              style: TextStyle(color: Colors.red)),
+                        ),
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: const Text('Close'),
@@ -398,6 +418,62 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _deleteDetection(DetectionData detection) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Image'),
+        content: const Text(
+            'Are you sure you want to delete this image? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        // Delete from provider (which deletes from database)
+        final provider = Provider.of<DetectionProvider>(context, listen: false);
+        await provider.deleteDetection(detection.id);
+
+        // Close the detail dialog
+        if (mounted) {
+          Navigator.pop(context);
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Image deleted successfully'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete image: $e'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
   }
 
   String _formatDate(DateTime date) {
