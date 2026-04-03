@@ -79,7 +79,7 @@ class _FullscreenCameraViewState extends State<FullscreenCameraView> {
                       children: [
                         // Top Bar
                         Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(12.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -90,42 +90,52 @@ class _FullscreenCameraViewState extends State<FullscreenCameraView> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: IconButton(
+                                  padding: const EdgeInsets.all(8),
+                                  constraints: const BoxConstraints(),
                                   icon: const Icon(
                                     Icons.fullscreen_exit,
                                     color: Colors.white,
-                                    size: 28,
+                                    size: 24,
                                   ),
                                   onPressed: () => Navigator.pop(context),
                                   tooltip: 'Exit Fullscreen',
                                 ),
                               ),
                               // Camera Title
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.videocam,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      widget.cameraTitle,
-                                      style: const TextStyle(
+                              Flexible(
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.videocam,
                                         color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                        size: 16,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: Text(
+                                          widget.cameraTitle,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               // Live Indicator
