@@ -1,7 +1,6 @@
 import 'dart:ui'; // Required for ImageFilter
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HealthStatusCard extends StatelessWidget {
   final String status;
@@ -12,7 +11,7 @@ class HealthStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = AppTheme.getHealthStatusColor(status);
-    
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(30),
       child: BackdropFilter(
@@ -22,7 +21,8 @@ class HealthStatusCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+            border:
+                Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: statusColor.withOpacity(0.1),
@@ -40,12 +40,13 @@ class HealthStatusCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: statusColor.withOpacity(0.1),
                 ),
-                child: Icon(Icons.warning_rounded, color: statusColor, size: 40),
+                child:
+                    Icon(Icons.warning_rounded, color: statusColor, size: 40),
               ),
               const SizedBox(height: 12),
               Text(
                 "Disease Detected",
-                style: GoogleFonts.poppins(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: statusColor,

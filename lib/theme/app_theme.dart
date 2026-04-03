@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Brand Colors
@@ -65,9 +64,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      textTheme: GoogleFonts.poppinsTextTheme(
-        ThemeData(brightness: Brightness.light).textTheme,
-      ),
+      textTheme: ThemeData(brightness: Brightness.light).textTheme,
       colorScheme: ColorScheme.fromSeed(
         seedColor: lightPrimaryColor,
         brightness: Brightness.light,
@@ -113,9 +110,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      textTheme: GoogleFonts.poppinsTextTheme(
-        ThemeData(brightness: Brightness.dark).textTheme,
-      ),
+      textTheme: ThemeData(brightness: Brightness.dark).textTheme,
       colorScheme: ColorScheme.fromSeed(
         seedColor: darkPrimaryColor,
         brightness: Brightness.dark,
