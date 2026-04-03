@@ -7,6 +7,8 @@ import '../models/detection_data.dart';
 import '../theme/app_theme.dart';
 import '../services/network_camera_service.dart';
 import '../services/notification_service.dart';
+import '../widgets/mjpeg_stream_viewer.dart';
+import '../screens/rpi_camera_config_screen.dart';
 
 class DualStreamMonitoringScreen extends StatefulWidget {
   const DualStreamMonitoringScreen({super.key});
@@ -25,14 +27,14 @@ class _DualStreamMonitoringScreenState
   bool _isAutoDetecting = false;
   bool _isCapturing = false;
   String _detectionStatus = 'Monitoring...';
-  
+
   @override
   void initState() {
     super.initState();
     _initializeRPiCamera();
     _startAutoDetection();
   }
-  
+
   void _startAutoDetection() {
     // Simulate disease detection every 10 seconds
     _detectionTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
@@ -41,29 +43,31 @@ class _DualStreamMonitoringScreenState
       }
     });
   }
-  
+
   Future<void> _performDiseaseDetection() async {
     // Simulate AI disease detection
     final random = Random();
     final diseases = ['Healthy', 'White Spot Disease', 'Columnaris', 'Ich'];
     final statuses = ['healthy', 'disease', 'suspicious', 'disease'];
     final confidences = [0.95, 0.87, 0.72, 0.91];
-    
+
     final index = random.nextInt(diseases.length);
     final detectedDisease = diseases[index];
     final status = statuses[index];
     final confidence = confidences[index];
-    
+
     setState(() {
-      _detectionStatus = 'Detected: $detectedDisease (${(confidence * 100).toStringAsFixed(1)}%)';
+      _detectionStatus =
+          'Detected: $detectedDisease (${(confidence * 100).toStringAsFixed(1)}%)';
     });
-    
+
     // Auto-capture if disease detected
     if (status == 'disease' || status == 'suspicious') {
-      await _captureAndSave(detectedDisease, confidence, status, isAutomatic: true);
+      await _captureAndSave(detectedDisease, confidence, status,
+          isAutomatic: true);
     }
   }
-  
+
   Future<void> _initializeRPiCamera() async {
     try {
       _rpiVideoController = await _networkCameraService.initializeVideoStream();
@@ -75,18 +79,20 @@ class _DualStreamMonitoringScreenState
       print('RPi camera initialization failed: $e');
     }
   }
-  
-  Future<void> _captureAndSave(String diseaseName, double confidence, String status, {bool isAutomatic = false}) async {
+
+  Future<void> _captureAndSave(
+      String diseaseName, double confidence, String status,
+      {bool isAutomatic = false}) async {
     if (_isCapturing) return;
-    
+
     setState(() {
       _isCapturing = true;
     });
-    
+
     try {
       // Capture image from RPi camera
       final imagePath = await _networkCameraService.captureImage();
-      
+
       if (imagePath != null) {
         // Create detection data
         final detection = DetectionData(
@@ -98,25 +104,28 @@ class _DualStreamMonitoringScreenState
           status: status,
           severity: status == 'disease' ? 'critical' : 'early',
           cameraView: _showOverheadView ? 'overhead' : 'underwater',
-          recommendedAction: status == 'disease' 
+          recommendedAction: status == 'disease'
               ? 'Isolate affected fish immediately and consult veterinarian'
               : 'Monitor closely for changes',
         );
-        
+
         // Save to database
         final provider = Provider.of<DetectionProvider>(context, listen: false);
         await provider.addDetection(detection);
-        
+
         // Show notification to farmer
         if (status == 'disease' || status == 'suspicious') {
           NotificationService().showCriticalAlert(
             context,
-            title: isAutomatic ? '🚨 AUTO-DETECTED: $diseaseName' : '📸 Disease Captured',
-            message: '${(confidence * 100).toStringAsFixed(1)}% confidence. Image saved to gallery.',
+            title: isAutomatic
+                ? '🚨 AUTO-DETECTED: $diseaseName'
+                : '📸 Disease Captured',
+            message:
+                '${(confidence * 100).toStringAsFixed(1)}% confidence. Image saved to gallery.',
             severity: status,
           );
         }
-        
+
         // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -130,7 +139,7 @@ class _DualStreamMonitoringScreenState
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      isAutomatic 
+                      isAutomatic
                           ? 'Auto-captured: $diseaseName'
                           : 'Image captured and saved',
                     ),
@@ -159,7 +168,7 @@ class _DualStreamMonitoringScreenState
       });
     }
   }
-  
+
   Future<void> _manualCapture() async {
     await _captureAndSave(
       'Manual Capture',
@@ -168,7 +177,7 @@ class _DualStreamMonitoringScreenState
       isAutomatic: false,
     );
   }
-  
+
   @override
   void dispose() {
     _detectionTimer?.cancel();
@@ -180,13 +189,12 @@ class _DualStreamMonitoringScreenState
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dual-Stream Monitoring'),
-        backgroundColor: isDarkMode 
-            ? const Color(0xFF1A237E)
-            : const Color(0xFF0277BD),
+        backgroundColor:
+            isDarkMode ? const Color(0xFF1A237E) : const Color(0xFF0277BD),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -251,148 +259,163 @@ class _DualStreamMonitoringScreenState
           ),
         ),
         child: Consumer<DetectionProvider>(
-        builder: (context, provider, _) {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Dual Stream Views
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Overhead View
-                      _buildCameraView(
-                        title: 'Overhead View',
-                        subtitle: 'Checking for Columnaris & swimming behavior',
-                        icon: Icons.videocam,
-                        isActive: _showOverheadView,
-                        onTap: () {
-                          setState(() => _showOverheadView = true);
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      // Underwater (NoIR) View
-                      _buildCameraView(
-                        title: 'Underwater (NoIR) View',
-                        subtitle: 'Detecting Fin Rot & White Spot Disease',
-                        icon: Icons.water,
-                        isActive: !_showOverheadView,
-                        onTap: () {
-                          setState(() => _showOverheadView = false);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Control Panel
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? const Color(0xFF283593) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+          builder: (context, provider, _) {
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Dual Stream Views
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Overhead View
+                        _buildCameraView(
+                          title: 'Overhead View',
+                          subtitle:
+                              'Checking for Columnaris & swimming behavior',
+                          icon: Icons.videocam,
+                          isActive: _showOverheadView,
+                          onTap: () {
+                            setState(() => _showOverheadView = true);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        // Underwater (NoIR) View
+                        _buildCameraView(
+                          title: 'Underwater (NoIR) View',
+                          subtitle: 'Detecting Fin Rot & White Spot Disease',
+                          icon: Icons.water,
+                          isActive: !_showOverheadView,
+                          onTap: () {
+                            setState(() => _showOverheadView = false);
+                          },
                         ),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        // Detection Status
-                        Row(
-                          children: [
-                            Icon(
-                              _isAutoDetecting ? Icons.auto_awesome : Icons.pause_circle,
-                              color: _isAutoDetecting ? Colors.green : Colors.grey,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _detectionStatus,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: isDarkMode ? Colors.white : Colors.black87,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Control Panel
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color:
+                            isDarkMode ? const Color(0xFF283593) : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Detection Status
+                          Row(
+                            children: [
+                              Icon(
+                                _isAutoDetecting
+                                    ? Icons.auto_awesome
+                                    : Icons.pause_circle,
+                                color: _isAutoDetecting
+                                    ? Colors.green
+                                    : Colors.grey,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _detectionStatus,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black87,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Auto Detection Toggle
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Auto Disease Detection',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: isDarkMode ? Colors.white : Colors.black87,
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Auto Detection Toggle
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Auto Disease Detection',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black87,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Switch(
-                              value: _isAutoDetecting,
-                              onChanged: (value) {
-                                setState(() {
-                                  _isAutoDetecting = value;
-                                  _detectionStatus = value ? 'Auto-detection enabled' : 'Auto-detection paused';
-                                });
-                              },
-                              activeColor: Colors.green,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Manual Capture Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: _isCapturing ? null : _manualCapture,
-                            icon: _isCapturing 
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.camera_alt),
-                            label: Text(_isCapturing ? 'Capturing...' : 'Manual Capture'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0277BD),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                              Switch(
+                                value: _isAutoDetecting,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _isAutoDetecting = value;
+                                    _detectionStatus = value
+                                        ? 'Auto-detection enabled'
+                                        : 'Auto-detection paused';
+                                  });
+                                },
+                                activeColor: Colors.green,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Manual Capture Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _isCapturing ? null : _manualCapture,
+                              icon: _isCapturing
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.camera_alt),
+                              label: Text(_isCapturing
+                                  ? 'Capturing...'
+                                  : 'Manual Capture'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF0277BD),
+                                foregroundColor: Colors.white,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                
-                const SizedBox(height: 16),
-                // Latest Detection
-                _buildLatestDetection(provider),
-                const SizedBox(height: 16),
-              ],
-            ),
-          );
-        },
+
+                  const SizedBox(height: 16),
+                  // Latest Detection
+                  _buildLatestDetection(provider),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -418,32 +441,17 @@ class _DualStreamMonitoringScreenState
         ),
         child: Column(
           children: [
-            // Camera Feed Placeholder
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                color: Colors.grey[800],
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      icon,
-                      size: 48,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Camera Feed',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+            // Camera Feed - MJPEG Stream
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+              child: SizedBox(
+                height: 200,
+                child: MjpegStreamViewer(
+                  streamUrl: title.contains('Overhead')
+                      ? _networkCameraService.getVideoFeed1Url()
+                      : _networkCameraService.getVideoFeed2Url(),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -684,18 +692,12 @@ class _DualStreamMonitoringScreenState
       return '${difference.inDays}d ago';
     }
   }
-  
+
   void _showRPiSettings() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: const RPICameraSettingsDialog(),
-        ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RPiCameraConfigScreen(),
       ),
     );
   }
@@ -705,7 +707,8 @@ class RPICameraSettingsDialog extends StatefulWidget {
   const RPICameraSettingsDialog({super.key});
 
   @override
-  State<RPICameraSettingsDialog> createState() => _RPICameraSettingsDialogState();
+  State<RPICameraSettingsDialog> createState() =>
+      _RPICameraSettingsDialogState();
 }
 
 class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
@@ -749,8 +752,8 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
     setState(() {
       _isTesting = false;
       _isConnected = connected;
-      _statusMessage = connected 
-          ? 'Connected successfully!' 
+      _statusMessage = connected
+          ? 'Connected successfully!'
           : 'Connection failed. Check IP and port.';
     });
   }
@@ -778,7 +781,7 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -808,14 +811,14 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
                     Text(
                       'RPi Camera Settings',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       'Configure Raspberry Pi connection',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
-                      ),
+                            color: Colors.grey,
+                          ),
                     ),
                   ],
                 ),
@@ -849,14 +852,14 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _isConnected 
+                color: _isConnected
                     ? Colors.green.withOpacity(0.1)
                     : _isTesting
                         ? Colors.blue.withOpacity(0.1)
                         : Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: _isConnected 
+                  color: _isConnected
                       ? Colors.green
                       : _isTesting
                           ? Colors.blue
@@ -866,12 +869,12 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
               child: Row(
                 children: [
                   Icon(
-                    _isConnected 
+                    _isConnected
                         ? Icons.check_circle
                         : _isTesting
                             ? Icons.info
                             : Icons.error,
-                    color: _isConnected 
+                    color: _isConnected
                         ? Colors.green
                         : _isTesting
                             ? Colors.blue
@@ -883,7 +886,7 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
                     child: Text(
                       _statusMessage,
                       style: TextStyle(
-                        color: _isConnected 
+                        color: _isConnected
                             ? Colors.green[700]
                             : _isTesting
                                 ? Colors.blue[700]
@@ -909,7 +912,8 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.lightbulb_outline, size: 16, color: Colors.grey[600]),
+                    Icon(Icons.lightbulb_outline,
+                        size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 6),
                     Text(
                       'Example URLs:',
@@ -955,7 +959,8 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: _urlController.text.trim().isEmpty ? null : _saveSettings,
+                  onPressed:
+                      _urlController.text.trim().isEmpty ? null : _saveSettings,
                   icon: const Icon(Icons.save),
                   label: const Text('Save'),
                   style: ElevatedButton.styleFrom(

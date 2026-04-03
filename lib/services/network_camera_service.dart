@@ -5,26 +5,38 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class NetworkCameraService {
-  static final NetworkCameraService _instance = NetworkCameraService._internal();
+  static final NetworkCameraService _instance =
+      NetworkCameraService._internal();
   factory NetworkCameraService() => _instance;
   NetworkCameraService._internal();
 
   VideoPlayerController? _videoController;
-  String _rpiServerUrl = 'http://192.168.1.100:5000'; // Default RPi IP
-  
+  String _rpiServerUrl =
+      'http://192.168.1.100:5000'; // Default RPi IP - CHANGE THIS TO YOUR RPI IP
+
   // Set RPi server URL
   void setServerUrl(String url) {
-    _rpiServerUrl = url;
+    _rpiServerUrl =
+        url.replaceAll('https:', 'http:'); // Ensure http for local network
   }
-  
+
   // Get current server URL
   String get serverUrl => _rpiServerUrl;
-  
+
+  // Get video feed URL for camera 1
+  String getVideoFeed1Url() => '$_rpiServerUrl/video_feed1';
+
+  // Get video feed URL for camera 2 (if available)
+  String getVideoFeed2Url() => '$_rpiServerUrl/video_feed2';
+
   // Initialize video stream from RPi
-  Future<VideoPlayerController?> initializeVideoStream() async {
+  Future<VideoPlayerController?> initializeVideoStream(
+      {int cameraNumber = 1}) async {
     try {
-      // For MJPEG stream
-      final streamUrl = '$_rpiServerUrl/video_feed';
+      // For MJPEG stream - use video_feed1 or video_feed2
+      final streamUrl = cameraNumber == 1
+          ? '$_rpiServerUrl/video_feed1'
+          : '$_rpiServerUrl/video_feed2';
       _videoController = VideoPlayerController.networkUrl(Uri.parse(streamUrl));
       await _videoController!.initialize();
       return _videoController;
@@ -33,7 +45,7 @@ class NetworkCameraService {
       return null;
     }
   }
-  
+
   // Capture still image from RPi camera
   Future<String?> captureImage() async {
     try {
@@ -51,7 +63,7 @@ class NetworkCameraService {
       return null;
     }
   }
-  
+
   // Get camera status
   Future<Map<String, dynamic>> getCameraStatus() async {
     try {
@@ -72,20 +84,20 @@ class NetworkCameraService {
       'camera_active': false,
     };
   }
-  
+
   // Test connection to RPi
   Future<bool> testConnection() async {
     try {
       final response = await http.get(Uri.parse('$_rpiServerUrl/')).timeout(
-        const Duration(seconds: 5),
-      );
+            const Duration(seconds: 5),
+          );
       return response.statusCode == 200;
     } catch (e) {
       print('Connection test failed: $e');
       return false;
     }
   }
-  
+
   // Dispose resources
   void dispose() {
     _videoController?.dispose();
@@ -102,7 +114,8 @@ class RPICameraSettings extends StatefulWidget {
 }
 
 class _RPICameraSettingsState extends State<RPICameraSettings> {
-  final _urlController = TextEditingController(text: 'http://192.168.1.100:5000');
+  final _urlController =
+      TextEditingController(text: 'http://192.168.1.100:5000');
   final NetworkCameraService _cameraService = NetworkCameraService();
   bool _isTesting = false;
   bool _isConnected = false;
@@ -133,13 +146,14 @@ class _RPICameraSettingsState extends State<RPICameraSettings> {
                 hintText: 'http://192.168.1.100:5000',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
-                  icon: _isTesting 
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(_isConnected ? Icons.check_circle : Icons.wifi_off),
+                  icon: _isTesting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          _isConnected ? Icons.check_circle : Icons.wifi_off),
                   onPressed: _testConnection,
                 ),
               ),
@@ -197,16 +211,16 @@ class _RPICameraSettingsState extends State<RPICameraSettings> {
     setState(() {
       _isTesting = true;
     });
-    
+
     final url = _urlController.text.trim();
     _cameraService.setServerUrl(url);
     final connected = await _cameraService.testConnection();
-    
+
     setState(() {
       _isTesting = false;
       _isConnected = connected;
     });
-    
+
     if (connected) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
