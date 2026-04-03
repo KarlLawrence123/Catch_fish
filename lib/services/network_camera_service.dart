@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ class NetworkCameraService {
 
   VideoPlayerController? _videoController;
   String _rpiServerUrl =
-      'http://192.168.1.100:5000'; // Default RPi IP - CHANGE THIS TO YOUR RPI IP
+      'http://192.168.100.113:5000'; // Default RPi IP - CHANGE THIS TO YOUR RPI IP
 
   // Set RPi server URL
   void setServerUrl(String url) {
@@ -47,15 +48,18 @@ class NetworkCameraService {
   }
 
   // Capture still image from RPi camera
-  Future<String?> captureImage() async {
+  Future<String?> captureImage({int cameraNumber = 1}) async {
     try {
-      final response = await http.get(Uri.parse('$_rpiServerUrl/capture'));
+      // Choose endpoint based on camera number
+      final endpoint = cameraNumber == 1 ? '/capture' : '/capture2';
+      final response = await http.get(Uri.parse('$_rpiServerUrl$endpoint'));
+
       if (response.statusCode == 200) {
-        // Save image temporarily
-        final timestamp = DateTime.now().millisecondsSinceEpoch;
-        final filename = 'rpi_capture_$timestamp.jpg';
-        // In a real app, you'd save this to device storage
-        return filename;
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          // Return the filename from the server
+          return data['filename'];
+        }
       }
       return null;
     } catch (e) {
@@ -115,7 +119,7 @@ class RPICameraSettings extends StatefulWidget {
 
 class _RPICameraSettingsState extends State<RPICameraSettings> {
   final _urlController =
-      TextEditingController(text: 'http://192.168.1.100:5000');
+      TextEditingController(text: 'http://192.168.100.113:5000');
   final NetworkCameraService _cameraService = NetworkCameraService();
   bool _isTesting = false;
   bool _isConnected = false;
@@ -143,7 +147,7 @@ class _RPICameraSettingsState extends State<RPICameraSettings> {
               controller: _urlController,
               decoration: InputDecoration(
                 labelText: 'RPi Server URL',
-                hintText: 'http://192.168.1.100:5000',
+                hintText: 'http://192.168.100.113:5000',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: _isTesting

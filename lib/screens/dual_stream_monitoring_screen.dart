@@ -83,7 +83,7 @@ class _DualStreamMonitoringScreenState
 
   Future<void> _captureAndSave(
       String diseaseName, double confidence, String status,
-      {bool isAutomatic = false}) async {
+      {bool isAutomatic = false, int cameraNumber = 1}) async {
     if (_isCapturing) return;
 
     setState(() {
@@ -91,8 +91,9 @@ class _DualStreamMonitoringScreenState
     });
 
     try {
-      // Capture image from RPi camera
-      final imagePath = await _networkCameraService.captureImage();
+      // Capture image from RPi camera (specify which camera)
+      final imagePath =
+          await _networkCameraService.captureImage(cameraNumber: cameraNumber);
 
       if (imagePath != null) {
         // Create detection data
@@ -104,7 +105,7 @@ class _DualStreamMonitoringScreenState
           imagePath: imagePath,
           status: status,
           severity: status == 'disease' ? 'critical' : 'early',
-          cameraView: _showOverheadView ? 'overhead' : 'underwater',
+          cameraView: cameraNumber == 1 ? 'overhead' : 'underwater',
           recommendedAction: status == 'disease'
               ? 'Isolate affected fish immediately and consult veterinarian'
               : 'Monitor closely for changes',
@@ -171,12 +172,47 @@ class _DualStreamMonitoringScreenState
   }
 
   Future<void> _manualCapture() async {
-    await _captureAndSave(
-      'Manual Capture',
-      1.0,
-      'healthy',
-      isAutomatic: false,
+    // Show dialog to choose which camera to capture from
+    final selectedCamera = await showDialog<int>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Camera'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.blue),
+              title: const Text('Camera 1 - Overhead'),
+              subtitle: const Text('Capture from overhead view'),
+              onTap: () => Navigator.pop(context, 1),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.camera, color: Colors.teal),
+              title: const Text('Camera 2 - Underwater'),
+              subtitle: const Text('Capture from underwater view'),
+              onTap: () => Navigator.pop(context, 2),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
     );
+
+    if (selectedCamera != null) {
+      await _captureAndSave(
+        'Manual Capture',
+        1.0,
+        'healthy',
+        isAutomatic: false,
+        cameraNumber: selectedCamera,
+      );
+    }
   }
 
   @override
