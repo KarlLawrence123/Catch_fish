@@ -50,6 +50,7 @@ class _MjpegStreamViewerState extends State<MjpegStreamViewer> {
       if (response.statusCode == 200) {
         List<int> buffer = [];
         bool inFrame = false;
+        int frameCount = 0;
 
         await for (var chunk in response.stream) {
           if (_isDisposed) break;
@@ -70,14 +71,21 @@ class _MjpegStreamViewerState extends State<MjpegStreamViewer> {
             for (int i = 0; i < buffer.length - 1; i++) {
               if (buffer[i] == 0xFF && buffer[i + 1] == 0xD9) {
                 // Found complete frame
-                final frame = Uint8List.fromList(buffer.sublist(0, i + 2));
-                if (mounted && !_isDisposed) {
-                  setState(() {
-                    _currentFrame = frame;
-                    _isLoading = false;
-                    _errorMessage = null;
-                  });
+                frameCount++;
+
+                // Skip every other frame for lower latency (show 15fps instead of 30fps)
+                // This reduces processing overhead and improves responsiveness
+                if (frameCount % 2 == 0) {
+                  final frame = Uint8List.fromList(buffer.sublist(0, i + 2));
+                  if (mounted && !_isDisposed) {
+                    setState(() {
+                      _currentFrame = frame;
+                      _isLoading = false;
+                      _errorMessage = null;
+                    });
+                  }
                 }
+
                 buffer = buffer.sublist(i + 2);
                 inFrame = false;
                 break;
@@ -85,8 +93,8 @@ class _MjpegStreamViewerState extends State<MjpegStreamViewer> {
             }
           }
 
-          // Prevent buffer from growing too large
-          if (buffer.length > 1024 * 1024) {
+          // Prevent buffer from growing too large - reduced from 1MB to 512KB for faster processing
+          if (buffer.length > 512 * 1024) {
             buffer.clear();
             inFrame = false;
           }
