@@ -9,6 +9,7 @@ import '../services/network_camera_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/mjpeg_stream_viewer.dart';
 import '../screens/rpi_camera_config_screen.dart';
+import '../screens/fullscreen_camera_view.dart';
 
 class DualStreamMonitoringScreen extends StatefulWidget {
   const DualStreamMonitoringScreen({super.key});
@@ -441,17 +442,59 @@ class _DualStreamMonitoringScreenState
         ),
         child: Column(
           children: [
-            // Camera Feed - MJPEG Stream
+            // Camera Feed - MJPEG Stream with Fullscreen Button
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(16)),
               child: SizedBox(
                 height: 200,
-                child: MjpegStreamViewer(
-                  streamUrl: title.contains('Overhead')
-                      ? _networkCameraService.getVideoFeed1Url()
-                      : _networkCameraService.getVideoFeed2Url(),
-                  fit: BoxFit.cover,
+                child: Stack(
+                  children: [
+                    // Camera Stream
+                    MjpegStreamViewer(
+                      streamUrl: title.contains('Overhead')
+                          ? _networkCameraService.getVideoFeed1Url()
+                          : _networkCameraService.getVideoFeed2Url(),
+                      fit: BoxFit.cover,
+                    ),
+                    // Fullscreen Button Overlay
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            final streamUrl = title.contains('Overhead')
+                                ? _networkCameraService.getVideoFeed1Url()
+                                : _networkCameraService.getVideoFeed2Url();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FullscreenCameraView(
+                                  streamUrl: streamUrl,
+                                  cameraTitle: title,
+                                ),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.fullscreen,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
