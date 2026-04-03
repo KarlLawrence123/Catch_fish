@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:path_provider/path_provider.dart';
 
 class NetworkCameraService {
   static final NetworkCameraService _instance =
@@ -50,15 +51,30 @@ class NetworkCameraService {
   // Capture still image from RPi camera
   Future<String?> captureImage({int cameraNumber = 1}) async {
     try {
-      // Choose endpoint based on camera number
+      // Step 1: Trigger capture on RPi server
       final endpoint = cameraNumber == 1 ? '/capture' : '/capture2';
-      final response = await http.get(Uri.parse('$_rpiServerUrl$endpoint'));
+      final captureResponse =
+          await http.get(Uri.parse('$_rpiServerUrl$endpoint'));
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+      if (captureResponse.statusCode == 200) {
+        final data = json.decode(captureResponse.body);
         if (data['success'] == true) {
-          // Return the filename from the server
-          return data['filename'];
+          final filename = data['filename'];
+
+          // Step 2: Download the captured image
+          final imageUrl = '$_rpiServerUrl/images/$filename';
+          final imageResponse = await http.get(Uri.parse(imageUrl));
+
+          if (imageResponse.statusCode == 200) {
+            // Step 3: Save image to local device storage
+            final directory = await getApplicationDocumentsDirectory();
+            final imagePath = '${directory.path}/$filename';
+            final imageFile = File(imagePath);
+            await imageFile.writeAsBytes(imageResponse.bodyBytes);
+
+            print('✅ Image saved locally: $imagePath');
+            return imagePath;
+          }
         }
       }
       return null;
