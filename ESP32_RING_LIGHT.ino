@@ -10,12 +10,11 @@ IPAddress local_IP(192, 168, 100, 114);
 IPAddress gateway(192, 168, 100, 113);
 IPAddress subnet(255, 255, 255, 0);
 
-// Ring Light GPIO Pin
-const int RING_LIGHT_PIN = 2;  // Change to your actual GPIO pin
-
-// Status LED Pins
-const int RED_LED_PIN = 4;     // Red LED - Initializing
-const int GREEN_LED_PIN = 5;   // Green LED - Ready
+// PIN MAPPING (Based on your KiCad Schematic)
+const int RING_CTRL = 13;   // Ring Light Control
+const int BUZZER_CTRL = 12; // Buzzer Control
+const int LED1_CTRL = 14;   // RED LED (Initialization)
+const int LED2_CTRL = 27;   // GREEN LED (Ready)
 
 // Web Server on port 80
 WebServer server(80);
@@ -23,17 +22,19 @@ WebServer server(80);
 void setup() {
   Serial.begin(115200);
   
-  // Initialize Ring Light Pin
-  pinMode(RING_LIGHT_PIN, OUTPUT);
-  digitalWrite(RING_LIGHT_PIN, LOW);  // Start with ring light OFF
+  // Initialize Pins
+  pinMode(RING_CTRL, OUTPUT);
+  pinMode(BUZZER_CTRL, OUTPUT);
+  pinMode(LED1_CTRL, OUTPUT);
+  pinMode(LED2_CTRL, OUTPUT);
   
-  // Initialize Status LEDs
-  pinMode(RED_LED_PIN, OUTPUT);
-  pinMode(GREEN_LED_PIN, OUTPUT);
+  // Start with everything OFF
+  digitalWrite(RING_CTRL, LOW);
+  digitalWrite(BUZZER_CTRL, LOW);
   
-  // Turn on RED LED (Initializing)
-  digitalWrite(RED_LED_PIN, HIGH);
-  digitalWrite(GREEN_LED_PIN, LOW);
+  // --- STAGE 1: INITIALIZATION ---
+  digitalWrite(LED1_CTRL, HIGH); // Red ON
+  digitalWrite(LED2_CTRL, LOW);  // Green OFF
   Serial.println("Initializing... RED LED ON");
   
   // Connect to WiFi
@@ -52,6 +53,7 @@ void setup() {
   
   // Setup Web Server Endpoints
   server.on("/ringlight", HTTP_POST, handleRingLight);
+  server.on("/buzzer", HTTP_POST, handleBuzzer);
   server.on("/", HTTP_GET, handleRoot);
   server.on("/status", HTTP_GET, handleStatus);
   
@@ -59,9 +61,9 @@ void setup() {
   server.begin();
   Serial.println("Server started on port 80");
   
-  // Switch to GREEN LED (Ready)
-  digitalWrite(RED_LED_PIN, LOW);
-  digitalWrite(GREEN_LED_PIN, HIGH);
+  // --- STAGE 2: READY TO GO ---
+  digitalWrite(LED1_CTRL, LOW);  // Red OFF
+  digitalWrite(LED2_CTRL, HIGH); // Green ON
   Serial.println("Ring Light Control Ready! GREEN LED ON");
 }
 
@@ -77,13 +79,37 @@ void handleRingLight() {
     
     // Parse JSON body
     if (body.indexOf("\"state\":\"on\"") >= 0 || body.indexOf("\"state\": \"on\"") >= 0) {
-      digitalWrite(RING_LIGHT_PIN, HIGH);
+      digitalWrite(RING_CTRL, HIGH);
       Serial.println("Ring Light: ON");
       server.send(200, "application/json", "{\"status\":\"success\",\"state\":\"on\"}");
     } 
     else if (body.indexOf("\"state\":\"off\"") >= 0 || body.indexOf("\"state\": \"off\"") >= 0) {
-      digitalWrite(RING_LIGHT_PIN, LOW);
+      digitalWrite(RING_CTRL, LOW);
       Serial.println("Ring Light: OFF");
+      server.send(200, "application/json", "{\"status\":\"success\",\"state\":\"off\"}");
+    } 
+    else {
+      server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"Invalid state\"}");
+    }
+  } else {
+    server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"No body\"}");
+  }
+}
+
+// Handle Buzzer Control
+void handleBuzzer() {
+  if (server.hasArg("plain")) {
+    String body = server.arg("plain");
+    Serial.println("Received: " + body);
+    
+    if (body.indexOf("\"state\":\"on\"") >= 0 || body.indexOf("\"state\": \"on\"") >= 0) {
+      digitalWrite(BUZZER_CTRL, HIGH);
+      Serial.println("Buzzer: ON");
+      server.send(200, "application/json", "{\"status\":\"success\",\"state\":\"on\"}");
+    } 
+    else if (body.indexOf("\"state\":\"off\"") >= 0 || body.indexOf("\"state\": \"off\"") >= 0) {
+      digitalWrite(BUZZER_CTRL, LOW);
+      Serial.println("Buzzer: OFF");
       server.send(200, "application/json", "{\"status\":\"success\",\"state\":\"off\"}");
     } 
     else {
@@ -101,6 +127,7 @@ void handleRoot() {
 
 // Handle Status Endpoint
 void handleStatus() {
-  String state = digitalRead(RING_LIGHT_PIN) ? "on" : "off";
-  server.send(200, "application/json", "{\"status\":\"success\",\"state\":\"" + state + "\"}");
+  String ringState = digitalRead(RING_CTRL) ? "on" : "off";
+  String buzzerState = digitalRead(BUZZER_CTRL) ? "on" : "off";
+  server.send(200, "application/json", "{\"status\":\"success\",\"ringlight\":\"" + ringState + "\",\"buzzer\":\"" + buzzerState + "\"}");
 }
