@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:http/http.dart' as http;
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import '../models/detection_data.dart';
 import '../theme/app_theme.dart';
@@ -171,6 +173,26 @@ class _DualStreamMonitoringScreenState
     }
   }
 
+  Future<void> _toggleRingLight(bool enabled) async {
+    try {
+      // Send request to ESP32 to control ring light
+      final esp32Url = 'http://192.168.100.114:80/ringlight'; // ESP32 IP
+      final response = await http.post(
+        Uri.parse(esp32Url),
+        body: json.encode({'state': enabled ? 'on' : 'off'}),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        print('✅ Ring light ${enabled ? "ON" : "OFF"}');
+      } else {
+        print('❌ Failed to control ring light: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error controlling ring light: $e');
+    }
+  }
+
   Future<void> _manualCapture() async {
     // Show dialog to choose which camera to capture from
     final selectedCamera = await showDialog<int>(
@@ -249,23 +271,24 @@ class _DualStreamMonitoringScreenState
                 padding: const EdgeInsets.all(8.0),
                 child: Tooltip(
                   message: provider.nightModeEnabled
-                      ? 'Night Mode: ON'
-                      : 'Night Mode: OFF',
+                      ? 'Ring Light: ON'
+                      : 'Ring Light: OFF',
                   child: IconButton(
                     icon: Icon(
                       provider.nightModeEnabled
-                          ? Icons.nightlight
-                          : Icons.light_mode,
+                          ? Icons.highlight
+                          : Icons.highlight_outlined,
                       color: provider.nightModeEnabled
                           ? Colors.amber
                           : Colors.grey,
                     ),
                     onPressed: () {
                       provider.toggleNightMode();
+                      _toggleRingLight(provider.nightModeEnabled);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            'IR LED ${provider.nightModeEnabled ? 'ON' : 'OFF'}',
+                            'Ring Light ${provider.nightModeEnabled ? 'ON' : 'OFF'}',
                           ),
                           duration: const Duration(seconds: 1),
                         ),
