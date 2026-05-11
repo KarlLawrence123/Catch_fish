@@ -10,8 +10,6 @@ class RPiCameraConfigScreen extends StatefulWidget {
 }
 
 class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
-  final _ipController = TextEditingController(text: '192.168.1.100');
-  final _portController = TextEditingController(text: '5000');
   final NetworkCameraService _cameraService = NetworkCameraService();
   bool _showStream = false;
   String? _streamUrl;
@@ -19,17 +17,11 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
   @override
   void initState() {
     super.initState();
-    // Load saved URL if any
+    // Auto-discovery already set the URL in main.dart
     _streamUrl = _cameraService.getVideoFeed1Url();
   }
 
   void _updateStreamUrl() {
-    final ip = _ipController.text.trim();
-    final port = _portController.text.trim();
-    final url = 'http://$ip:$port';
-    
-    _cameraService.setServerUrl(url);
-    
     setState(() {
       _streamUrl = _cameraService.getVideoFeed1Url();
       _showStream = true;
@@ -39,13 +31,12 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('RPi Camera Setup'),
-        backgroundColor: isDarkMode 
-            ? const Color(0xFF1A237E)
-            : const Color(0xFF0277BD),
+        backgroundColor:
+            isDarkMode ? const Color(0xFF1A237E) : const Color(0xFF0277BD),
         foregroundColor: Colors.white,
       ),
       body: Container(
@@ -83,7 +74,7 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
                           Icon(Icons.info_outline, color: Colors.blue),
                           const SizedBox(width: 8),
                           Text(
-                            'Setup Instructions',
+                            'Auto-Discovery',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -94,12 +85,11 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        '1. Find your Raspberry Pi IP address:\n   Run "hostname -I" on your RPi\n\n'
-                        '2. Make sure your RPi server is running\n\n'
-                        '3. Enter the IP address and port below\n\n'
-                        '4. Tap "Connect to Camera"',
+                        'The app automatically connects to the RPi camera when you connect to the RPi WiFi hotspot (CatfishMonitor).\n\n'
+                        'No manual IP configuration needed!',
                         style: TextStyle(
-                          color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                          color:
+                              isDarkMode ? Colors.grey[300] : Colors.grey[700],
                           height: 1.5,
                         ),
                       ),
@@ -108,7 +98,7 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Configuration Card
               Card(
                 color: isDarkMode ? const Color(0xFF2D3748) : Colors.white,
@@ -118,7 +108,7 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Raspberry Pi Configuration',
+                        'Raspberry Pi Connection',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -126,59 +116,41 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
-                      // IP Address Field
-                      TextField(
-                        controller: _ipController,
-                        style: TextStyle(
-                          color: isDarkMode ? Colors.white : Colors.black,
+
+                      // Connection Status
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.green),
                         ),
-                        decoration: InputDecoration(
-                          labelText: 'IP Address',
-                          hintText: '192.168.1.100',
-                          labelStyle: TextStyle(
-                            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                          ),
-                          prefixIcon: const Icon(Icons.computer),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: isDarkMode ? const Color(0xFF1A202C) : Colors.grey[100],
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle,
+                                color: Colors.green, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _streamUrl ?? 'Auto-discovering...',
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      // Port Field
-                      TextField(
-                        controller: _portController,
-                        style: TextStyle(
-                          color: isDarkMode ? Colors.white : Colors.black,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: 'Port',
-                          hintText: '5000',
-                          labelStyle: TextStyle(
-                            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                          ),
-                          prefixIcon: const Icon(Icons.settings_ethernet),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: isDarkMode ? const Color(0xFF1A202C) : Colors.grey[100],
-                        ),
-                        keyboardType: TextInputType.number,
                       ),
                       const SizedBox(height: 20),
-                      
+
                       // Connect Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: _updateStreamUrl,
                           icon: const Icon(Icons.videocam),
-                          label: const Text('Connect to Camera'),
+                          label: const Text('View Camera Stream'),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             backgroundColor: const Color(0xFF0277BD),
@@ -186,7 +158,7 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
                           ),
                         ),
                       ),
-                      
+
                       if (_streamUrl != null) ...[
                         const SizedBox(height: 12),
                         Container(
@@ -198,7 +170,8 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.link, color: Colors.blue, size: 20),
+                              const Icon(Icons.link,
+                                  color: Colors.blue, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -217,7 +190,7 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
                   ),
                 ),
               ),
-              
+
               // Camera Stream Preview
               if (_showStream && _streamUrl != null) ...[
                 const SizedBox(height: 20),
@@ -261,8 +234,6 @@ class _RPiCameraConfigScreenState extends State<RPiCameraConfigScreen> {
 
   @override
   void dispose() {
-    _ipController.dispose();
-    _portController.dispose();
     super.dispose();
   }
 }

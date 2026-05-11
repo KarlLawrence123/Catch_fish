@@ -13,8 +13,8 @@ class NetworkCameraService {
   NetworkCameraService._internal();
 
   VideoPlayerController? _videoController;
-  String _rpiServerUrl =
-      'http://192.168.100.113:5000'; // Default RPi IP - CHANGE THIS TO YOUR RPI IP
+  String _rpiServerUrl = 'http://192.168.100.113:5000'; // Default RPi IP
+  bool _autoDiscovered = false;
 
   // Set RPi server URL
   void setServerUrl(String url) {
@@ -24,6 +24,36 @@ class NetworkCameraService {
 
   // Get current server URL
   String get serverUrl => _rpiServerUrl;
+
+  // Auto-discover RPi when connected to RPi hotspot
+  Future<bool> autoDiscoverRPi() async {
+    try {
+      // Try to connect to default RPi IP
+      final testUrl = 'http://192.168.100.113:5000';
+      try {
+        final response = await http.get(Uri.parse('$testUrl/')).timeout(
+              const Duration(seconds: 2),
+            );
+
+        if (response.statusCode == 200) {
+          _rpiServerUrl = testUrl;
+          _autoDiscovered = true;
+          print('✅ RPi auto-discovered at: $_rpiServerUrl');
+          return true;
+        }
+      } catch (e) {
+        print('RPi not found at default IP, will use manual configuration');
+      }
+
+      return false;
+    } catch (e) {
+      print('Error during auto-discovery: $e');
+      return false;
+    }
+  }
+
+  // Check if RPi was auto-discovered
+  bool get isAutoDiscovered => _autoDiscovered;
 
   // Get video feed URL for camera 1
   String getVideoFeed1Url() => '$_rpiServerUrl/video_feed1';

@@ -176,7 +176,8 @@ class _DualStreamMonitoringScreenState
   Future<void> _toggleRingLight(bool enabled) async {
     try {
       // Send request to ESP32 to control ring light
-      final esp32Url = 'http://192.168.100.114:80/ringlight'; // ESP32 IP
+      final esp32Url =
+          'http://192.168.100.114:80/ringlight'; // ESP32 on RPi network
       final response = await http.post(
         Uri.parse(esp32Url),
         body: json.encode({'state': enabled ? 'on' : 'off'}),
@@ -809,81 +810,19 @@ class RPICameraSettingsDialog extends StatefulWidget {
   const RPICameraSettingsDialog({super.key});
 
   @override
-  State<RPICameraSettingsDialog> createState() =>
-      _RPICameraSettingsDialogState();
+  State<RPICameraSettingsDialog> createState() => _RPiSettingsState();
 }
 
-class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
-  final _urlController = TextEditingController();
+class _RPiSettingsState extends State<RPICameraSettingsDialog> {
   final NetworkCameraService _cameraService = NetworkCameraService();
-  bool _isTesting = false;
-  bool _isConnected = false;
-  String _statusMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _urlController.text = _cameraService.serverUrl;
-  }
-
-  @override
-  void dispose() {
-    _urlController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _testConnection() async {
-    setState(() {
-      _isTesting = true;
-      _statusMessage = 'Testing connection...';
-    });
-
-    final url = _urlController.text.trim();
-    if (url.isEmpty) {
-      setState(() {
-        _isTesting = false;
-        _isConnected = false;
-        _statusMessage = 'Please enter a URL';
-      });
-      return;
-    }
-
-    _cameraService.setServerUrl(url);
-    final connected = await _cameraService.testConnection();
-
-    setState(() {
-      _isTesting = false;
-      _isConnected = connected;
-      _statusMessage = connected
-          ? 'Connected successfully!'
-          : 'Connection failed. Check IP and port.';
-    });
-  }
-
-  void _saveSettings() {
-    final url = _urlController.text.trim();
-    if (url.isNotEmpty) {
-      _cameraService.setServerUrl(url);
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 8),
-              Text('RPi camera settings saved'),
-            ],
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -933,178 +872,88 @@ class _RPICameraSettingsDialogState extends State<RPICameraSettingsDialog> {
           ),
           const SizedBox(height: 24),
 
-          // URL Input
-          TextField(
-            controller: _urlController,
-            decoration: InputDecoration(
-              labelText: 'RPi Server URL',
-              hintText: 'http://192.168.1.100:5000',
-              prefixIcon: const Icon(Icons.link),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              helperText: 'Enter your Raspberry Pi IP address and port',
-            ),
-            keyboardType: TextInputType.url,
-          ),
-          const SizedBox(height: 16),
-
-          // Status Message
-          if (_statusMessage.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _isConnected
-                    ? Colors.green.withOpacity(0.1)
-                    : _isTesting
-                        ? Colors.blue.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: _isConnected
-                      ? Colors.green
-                      : _isTesting
-                          ? Colors.blue
-                          : Colors.red,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    _isConnected
-                        ? Icons.check_circle
-                        : _isTesting
-                            ? Icons.info
-                            : Icons.error,
-                    color: _isConnected
-                        ? Colors.green
-                        : _isTesting
-                            ? Colors.blue
-                            : Colors.red,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _statusMessage,
-                      style: TextStyle(
-                        color: _isConnected
-                            ? Colors.green[700]
-                            : _isTesting
-                                ? Colors.blue[700]
-                                : Colors.red[700],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const SizedBox(height: 24),
-
-          // Example URLs
+          // Auto-Discovery Info
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? Colors.grey[800] : Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.lightbulb_outline,
-                        size: 16, color: Colors.grey[600]),
-                    const SizedBox(width: 6),
+                    Icon(Icons.info_outline, color: Colors.blue),
+                    const SizedBox(width: 8),
                     Text(
-                      'Example URLs:',
+                      'Auto-Discovery',
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                _buildExampleUrl('http://192.168.1.100:5000'),
-                _buildExampleUrl('http://192.168.0.50:5000'),
-                _buildExampleUrl('http://10.0.0.5:5000'),
+                Text(
+                  'The app automatically connects to the RPi when you connect to the CatfishMonitor WiFi hotspot.\n\n'
+                  'No manual IP configuration needed!',
+                  style: TextStyle(
+                    color: Colors.blue[800],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Current Connection Status
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _cameraService.serverUrl,
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
           const SizedBox(height: 24),
 
-          // Action Buttons
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _isTesting ? null : _testConnection,
-                  icon: _isTesting
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.wifi_find),
-                  label: Text(_isTesting ? 'Testing...' : 'Test Connection'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+          // Close Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.check),
+              label: const Text('Done'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0277BD),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed:
-                      _urlController.text.trim().isEmpty ? null : _saveSettings,
-                  icon: const Icon(Icons.save),
-                  label: const Text('Save'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0277BD),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExampleUrl(String url) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _urlController.text = url;
-        });
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Icon(Icons.touch_app, size: 14, color: Colors.grey[500]),
-            const SizedBox(width: 6),
-            Text(
-              url,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.blue[700],
-                decoration: TextDecoration.underline,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

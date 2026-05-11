@@ -12,6 +12,7 @@ import 'screens/gallery_screen.dart';
 import 'models/detection_data.dart';
 import 'services/database_service.dart';
 import 'services/auth_service.dart';
+import 'services/network_camera_service.dart';
 import 'widgets/ocean_background.dart';
 
 void main() async {
@@ -24,6 +25,10 @@ void main() async {
   // Initialize Auth Service (offline mode)
   final authService = AuthService();
   await authService.initialize();
+
+  // Auto-discover RPi if connected to RPi hotspot
+  final cameraService = NetworkCameraService();
+  await cameraService.autoDiscoverRPi();
 
   runApp(const CatfishDetectorApp());
 }
