@@ -29,9 +29,9 @@ class NetworkCameraService {
   Future<bool> autoDiscoverRPi() async {
     try {
       // Try to connect to default RPi IP
-      final testUrl = 'http://192.168.100.113:5000';
+      final testUrl = 'http://10.42.1.0:5000';
       try {
-        final response = await http.get(Uri.parse('$testUrl/')).timeout(
+        final response = await http.get(Uri.parse(testUrl)).timeout(
               const Duration(seconds: 2),
             );
 

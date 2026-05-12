@@ -924,7 +924,7 @@ class _RPiSettingsState extends State<RPICameraSettingsDialog> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    _cameraService.serverUrl,
+                    'RPi: 10.42.1.0',
                     style: const TextStyle(
                       color: Colors.green,
                       fontSize: 12,
