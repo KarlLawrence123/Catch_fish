@@ -94,14 +94,14 @@ def index():
         'quality': JPEG_QUALITY
     })
 
-@app.route('/video_feed1')
-def video_feed1():
+@app.route('/video1')
+def video1():
     """Camera 1 - Overhead View"""
     return Response(generate_frames(picam1),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/video_feed2')
-def video_feed2():
+@app.route('/video2')
+def video2():
     """Camera 2 - Underwater View"""
     return Response(generate_frames(picam2),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -184,12 +184,12 @@ if __name__ == '__main__':
         print(f"🖼️  JPEG Quality: {JPEG_QUALITY}")
         print(f"✨ Auto White Balance: Enabled")
         print(f"📁 Captures saved to: {CAPTURE_DIR}")
-        print(f"🌐 Server: http://10.42.1.0:5000")
-        print(f"📹 Camera 1: http://10.42.1.0:5000/video_feed1")
-        print(f"📹 Camera 2: http://10.42.1.0:5000/video_feed2")
-        print(f"📸 Capture 1: http://10.42.1.0:5000/capture")
-        print(f"📸 Capture 2: http://10.42.1.0:5000/capture2")
-        print(f"🖼️  Images: http://10.42.1.0:5000/images/<filename>")
+        print(f"🌐 Server: http://10.42.0.1:5000")
+        print(f"📹 Camera 1: http://10.42.0.1:5000/video1")
+        print(f"📹 Camera 2: http://10.42.0.1:5000/video2")
+        print(f"📸 Capture 1: http://10.42.0.1:5000/capture")
+        print(f"📸 Capture 2: http://10.42.0.1:5000/capture2")
+        print(f"🖼️  Images: http://10.42.0.1:5000/images/<filename>")
         print("=" * 60)
         
         app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)

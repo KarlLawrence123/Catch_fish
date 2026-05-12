@@ -29,7 +29,7 @@ class NetworkCameraService {
   Future<bool> autoDiscoverRPi() async {
     try {
       // Try to connect to default RPi IP
-      final testUrl = 'http://10.42.1.0:5000';
+      final testUrl = 'http://10.42.0.1:5000';
       try {
         final response = await http.get(Uri.parse(testUrl)).timeout(
               const Duration(seconds: 2),
@@ -55,20 +55,17 @@ class NetworkCameraService {
   // Check if RPi was auto-discovered
   bool get isAutoDiscovered => _autoDiscovered;
 
-  // Get video feed URL for camera 1
-  String getVideoFeed1Url() => '$_rpiServerUrl/video_feed1';
-
-  // Get video feed URL for camera 2 (if available)
-  String getVideoFeed2Url() => '$_rpiServerUrl/video_feed2';
+  // Get video feed URLs
+  String getVideoFeed1Url() => '$_rpiServerUrl/video1';
+  String getVideoFeed2Url() => '$_rpiServerUrl/video2';
 
   // Initialize video stream from RPi
   Future<VideoPlayerController?> initializeVideoStream(
       {int cameraNumber = 1}) async {
     try {
-      // For MJPEG stream - use video_feed1 or video_feed2
-      final streamUrl = cameraNumber == 1
-          ? '$_rpiServerUrl/video_feed1'
-          : '$_rpiServerUrl/video_feed2';
+      // For MJPEG stream - use video1 or video2
+      final streamUrl =
+          cameraNumber == 1 ? '$_rpiServerUrl/video1' : '$_rpiServerUrl/video2';
       _videoController = VideoPlayerController.networkUrl(Uri.parse(streamUrl));
       await _videoController!.initialize();
       return _videoController;
